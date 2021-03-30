@@ -100,12 +100,12 @@ class Knight < ChessBoard
            return nil
         end
     end
-    def tree_path(current = @@starting_position)
-#if move...(current) hmmmm... how do I store the moves? a non-instanced array variable?
-#I want all legal moves to be children of my current position
-#How do I store this, how will I use the list of legal moves?
-#if I add each legal move to the array, then recursively call the function on each member of the array
-#in theory I should have every legal move, right? lets try it out
+    def tree_path(current = @@starting_position, goal = [1,2])
+
+        if current == goal
+            puts 'cupcake'
+           # exit
+        else
         legal_moves = []
         if self.move_plus2_plus1
             legal_moves << self.move_plus2_plus1
@@ -131,12 +131,23 @@ class Knight < ChessBoard
         if self.move_minus1_minus2
             legal_moves << self.move_minus1_minus2
         end
+        legal_moves.each do |move|
+            
+            move
+        end
+    end
     end
     
+#for current == goal, how many times do I add/subtract [1,2] or [2,1] the fewest times?
+#which move, when combined with current, gets me closest to goal?
+
+#idea: Remove the legality check from moves, just make them change the value of current position. 
+#move the legality check into adding current's coordinates with each move's coordinates.
+#whichever current+move combo is.. (closest? divisible by 2? other criteria?) to goal is the value to 
+#recursively call until current == goal.
 
     
 end
 board = ChessBoard.new
 knight = Knight.new
-puts knight.move_plus2_plus1
-puts knight.move_plus1_plus2
+print knight.tree_path
