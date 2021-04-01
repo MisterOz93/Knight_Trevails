@@ -1,12 +1,8 @@
 # +2 +1, +2 -1, -2 +1, -2 -1, 
 #+1 +2, +1 -2, -1 +2, -1 -2
 
-#so now i need to figure out how to use the moves sequentially to reach a certain position
-#from current position (root), I need to make the legal moves its children, then make those children's
-#legal moves children. Then I search through the tree (BFS?) until I find the correct coordinates.
-#I may need to swap legal move check from the move methods to the tree method?
+#current problem is line 138
 class ChessBoard
-
 
     def initialize
         
@@ -21,7 +17,7 @@ class ChessBoard
     end
 end
 class Knight < ChessBoard
-    @@starting_position = [0,0]
+    @@starting_position = [0,0].freeze
     
     def initialize(current_position = @@starting_position)
         @current_position = current_position
@@ -100,54 +96,56 @@ class Knight < ChessBoard
            return nil
         end
     end
-    def tree_path(current = @@starting_position, goal = [1,2])
-
-        if current == goal
-            puts 'cupcake'
-           # exit
-        else
-        legal_moves = []
-        if self.move_plus2_plus1
-            legal_moves << self.move_plus2_plus1
-        end
-        if self.move_plus2_minus1
-            legal_moves << self.move_plus2_minus1
-        end
-        if self.move_minus2_plus1
-            legal_moves << self.move_minus2_plus1
-        end
-        if self.move_minus2_minus1
-            legal_moves << self.move_minus2_minus1
-        end
-        if self.move_plus1_plus2
-            legal_moves << self.move_plus1_plus2
-        end
-        if self.move_plus1_minus2
-            legal_moves << self.move_plus1_minus2
-        end
-        if self.move_minus1_plus2
-            legal_moves << self.move_minus1_plus2
-        end
-        if self.move_minus1_minus2
-            legal_moves << self.move_minus1_minus2
-        end
-        legal_moves.each do |move|
-            
-            move
-        end
+    def legal_moves(position = @@starting_position)
+        moves = []
+        moves << self.move_plus2_plus1(position)
+        moves << self.move_plus2_minus1(position)
+        moves << self.move_minus2_plus1(position)
+        moves << self.move_minus2_minus1(position)
+        moves << self.move_plus1_plus2(position)
+        moves << self.move_plus1_minus2(position)
+        moves << self.move_minus1_plus2(position)
+        moves << self.move_minus1_minus2(position)
+        legal_moves = moves.select do |move|
+            move if move.is_a?(Array)
+           end
+        legal_moves            
     end
+    def weigh(goal = [7,7], position = @@starting_position, reset = nil) 
+        #call this method at start of knight travails method using current position, goal, and 1(reset)
+        @tiles = {} unless @tiles 
+        @weight = 1 unless @weight
+        @weight_increase = [] unless @weight_increase
+        @queue = [goal] unless @queue
+        @tiles = {} if reset 
+        @weight = 1 if reset
+        @queue = [goal] if reset
+        @weight_increase [] if reset
+        @tiles[goal] = 0 if @tiles.empty?
+        unless @queue.empty?
+            legal_moves = self.legal_moves(@queue[0]) #an array of goal's children
+            unchecked = [] 
+            legal_moves.each do |move|
+                unless @tiles.include?(move)
+                    @tiles[move] = @weight
+                    @queue << move
+                    unchecked << move
+                end
+            end 
+            @weight_increase << unchecked[-1]
+        @weight += 1 if @weight_increase.include? @queue.shift 
+        self.weigh(@queue[0])
+        #@weight is increasing too quickly. go through process slowly and figure out where error in logic is. 
+        end
+     
     end
-    
-#for current == goal, how many times do I add/subtract [1,2] or [2,1] the fewest times?
-#which move, when combined with current, gets me closest to goal?
-
-#idea: Remove the legality check from moves, just make them change the value of current position. 
-#move the legality check into adding current's coordinates with each move's coordinates.
-#whichever current+move combo is.. (closest? divisible by 2? other criteria?) to goal is the value to 
-#recursively call until current == goal.
-
-    
+    def check_tiles
+        @tiles
+    end
 end
+    
+
 board = ChessBoard.new
 knight = Knight.new
-print knight.tree_path
+knight.weigh
+print knight.check_tiles
