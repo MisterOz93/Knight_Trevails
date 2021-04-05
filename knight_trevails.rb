@@ -1,7 +1,7 @@
 # +2 +1, +2 -1, -2 +1, -2 -1, 
 #+1 +2, +1 -2, -1 +2, -1 -2
 
-#current problem is line 138
+#current problem is line 125
 class ChessBoard
 
     def initialize
@@ -111,32 +111,40 @@ class Knight < ChessBoard
            end
         legal_moves            
     end
-    def weigh(goal = [7,7], position = @@starting_position, reset = nil) 
-        #call this method at start of knight travails method using current position, goal, and 1(reset)
-        @tiles = {} unless @tiles 
-        @weight = 1 unless @weight
-        @weight_increase = [] unless @weight_increase
-        @queue = [goal] unless @queue
-        @tiles = {} if reset 
-        @weight = 1 if reset
-        @queue = [goal] if reset
-        @weight_increase [] if reset
-        @tiles[goal] = 0 if @tiles.empty?
-        unless @queue.empty?
-            legal_moves = self.legal_moves(@queue[0]) #an array of goal's children
-            unchecked = [] 
-            legal_moves.each do |move|
-                unless @tiles.include?(move)
-                    @tiles[move] = @weight
-                    @queue << move
-                    unchecked << move
+    def weigh(goal = [7,7]) 
+        #call this method at start of knight travails method using current position, goal
+        @tiles = {goal => 0} 
+        @weight = 1 
+        @weight_watcher = []
+        @level = [goal] 
+        while @tiles.length < 64           
+            if @tiles.length <= 1
+                legal = legal_moves(@level[0])
+                moves1 = legal.select do |move|
+                    move unless @tiles.include? move
+                    end
+                    @weight_watcher << moves1[-1]
                 end
-            end 
-            @weight_increase << unchecked[-1]
-        @weight += 1 if @weight_increase.include? @queue.shift 
-        self.weigh(@queue[0])
-        #@weight is increasing too quickly. go through process slowly and figure out where error in logic is. 
+                moves2 = []
+                moves1.each do |move|
+                    legal_moves = self.legal_moves(move)
+                    legal_moves.each do |move2|
+                        moves2 << move2 unless @tiles.include? move2
+                    end
+                end
+                @weight_watcher << moves2[-1]
+                moves1.each do |move|
+                    @tiles[move] = @weight
+                end
+                @weight_watcher.each do |move|
+                    if @tiles.include? move
+                         @weight += 1
+                        @weight_watcher.delete(move)
+                    end 
+                end
+                moves1 = moves2
         end
+        
      
     end
     def check_tiles
