@@ -1,22 +1,4 @@
-# +2 +1, +2 -1, -2 +1, -2 -1, 
-#+1 +2, +1 -2, -1 +2, -1 -2
-
-#current problem is line 125
-class ChessBoard
-
-    def initialize
-        
-    end
-    def legal_move(arr)
-        if arr[0] >= 8 || arr[1] >= 8
-            return nil
-        elsif arr[0] < 0 || arr[1] < 0
-            return nil
-        end
-    true
-    end
-end
-class Knight < ChessBoard
+class Knight
     @@starting_position = [0,0].freeze
     
     def initialize(current_position = @@starting_position)
@@ -27,6 +9,14 @@ class Knight < ChessBoard
     end
     def reset_position
         @current_position = @@starting_position
+    end
+    def legal_move(arr)
+        if arr[0] >= 8 || arr[1] >= 8
+            return nil
+        elsif arr[0] < 0 || arr[1] < 0
+            return nil
+        end
+    true
     end
 
     def move_plus2_plus1(position = @@starting_position)
@@ -150,10 +140,43 @@ class Knight < ChessBoard
     def check_tiles
         @tiles
     end
-end
-    
+    def knight_travails(current = @current_position, goal = [7,7])
+        self.weigh(goal)
+        moves = [current]
+        next_move = []
+        number_of_moves = 0
+        new_current = current
+        if @tiles[new_current] == @tiles[goal]
+            puts "Knight is already at #{goal}!"
+            return
+        else
+            while @tiles[new_current] != @tiles[goal]
+            legal_moves = self.legal_moves(new_current)
+            legal_moves.each do |move|
+                if @tiles[move] == @tiles[new_current] - 1
+                    next_move = move
+                    break
+                end
+            end
+            moves << next_move
+            new_current = next_move
+            number_of_moves += 1
+            end
+            puts "The Knight reached tile #{goal} from #{current} in #{number_of_moves} moves:"
+           while !moves.empty? 
+                if moves[1]
+                     puts "#{moves[0]} -> #{moves[1]}" 
+                     moves.shift
+                else 
+                return
+                end
+           end 
 
-board = ChessBoard.new
+        
+        moves
+        end
+    end
+end
+
 knight = Knight.new
-knight.weigh
-print knight.check_tiles
+print knight.knight_travails([3,3],[4,3])
